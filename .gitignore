@@ -1,0 +1,7 @@
+__pycache__
+
+.venv
+
+assets.db
+assets.db-shm
+assets.db-wal
