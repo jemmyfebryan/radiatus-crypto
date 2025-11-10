@@ -143,13 +143,17 @@ def generate_signals(
     # Add tqdm progress bar
     for asset_code in tqdm(TICKER, desc="Processing TICKER assets", unit="asset"):
         # Fetch Asset Price
-        df = fetch_asset_from_db(asset_code, period=period, interval=interval)
-        df.reset_index(inplace=True)
-        df['timestamp'] = pd.to_datetime(df['Date']).astype('int64') // 10**9
-        df["mfi"] = ta_mfi(df, fill_na=True)
-        df["stoch"] = ta_stoch(df, fill_na=True)
-        df["rsi"] = ta_rsi(df, fill_na=True)
-        df["williams_r"] = ta_williams_r(df, fill_na=True)
+        try:
+            df = fetch_asset_from_db(asset_code, period=period, interval=interval)
+            df.reset_index(inplace=True)
+            df['timestamp'] = pd.to_datetime(df['Date']).astype('int64') // 10**9
+            df["mfi"] = ta_mfi(df, fill_na=True)
+            df["stoch"] = ta_stoch(df, fill_na=True)
+            df["rsi"] = ta_rsi(df, fill_na=True)
+            df["williams_r"] = ta_williams_r(df, fill_na=True)
+        except Exception as e:
+            logger.error(f"Error when fetch asset: {asset_code}: {str(e)}")
+            continue
         
         price = df.at[len(df)-1, "Close"]
         
