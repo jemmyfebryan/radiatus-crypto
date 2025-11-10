@@ -1,0 +1,14 @@
+{
+  "apps": [
+    {
+      "name": "signal-backend",
+      "script": "uvicorn",
+      "args": "core.backend.app:app --host 0.0.0.0 --port 8000",
+      "interpreter": "python",
+      "cwd": ".",
+      "env_production": {
+        "NODE_ENV": "production"
+      }
+    }
+  ]
+}

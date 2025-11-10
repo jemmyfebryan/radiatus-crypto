@@ -115,8 +115,17 @@ def fetch_asset_from_db(
             'Volume': 'sum'
         }
 
-        # Resample the 1-hour data to the target interval (e.g., "4h", "1d", "1w")
-        resampled_df = df.resample(interval).agg(agg_rules)
+        # Align timestamps to exact multiples of the interval (e.g. start at 00:00)
+        df.index = df.index.floor('1h')  # ensure clean hourly alignment
+
+        # Optional: force UTC or timezone-naive consistency
+        df.index = df.index.tz_localize(None)
+
+        # Resample with explicit label and closed alignment
+        resampled_df = (
+            df.resample(interval, label='right', closed='right', origin='start_day')
+            .agg(agg_rules)
+        )
 
         # Drop rows where all values are NaN (which happens for empty periods)
         resampled_df = resampled_df.dropna(how='all')
