@@ -47,7 +47,7 @@ async def run_signal_generation():
         #    to avoid blocking the main async loop if it's I/O bound)
         #    If your update_data() is already async, 'await' it directly.
         loop = asyncio.get_event_loop()
-        # await loop.run_in_executor(None, update_data)
+        await loop.run_in_executor(None, update_data)
         
         logger.info(f"Finished updating data, now generating signals...")
         
