@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Radiatus Crypto - Terminal</title>
+  
+  <!-- Load Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Font: Inconsolata (a perfect terminal font) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Custom CSS for Terminal Aesthetics -->
+  <style>
+    /* Import the font */
+    @import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&display=swap');
+
+    /* Base styles */
+    html {
+      background-color: #0a0a0a; /* Off-black for a softer feel */
+      color: #00ff41; /* Classic terminal green */
+      font-family: 'Inconsolata', monospace;
+    }
+
+    body {
+      background-color: #0a0a0a;
+      font-family: 'Inconsolata', monospace;
+    }
+
+    /* Text glow effect */
+    .text-glow-green {
+      text-shadow: 0 0 5px rgba(0, 255, 65, 0.7), 0 0 10px rgba(0, 255, 65, 0.5);
+    }
+    .text-glow-red {
+      text-shadow: 0 0 5px rgba(255, 0, 65, 0.7), 0 0 10px rgba(255, 0, 65, 0.5);
+    }
+
+    /* Blinking cursor for "live" feel */
+    .blinking-cursor {
+      display: inline-block;
+      width: 10px;
+      height: 1.1em; /* Match text height */
+      background-color: #00ff41;
+      margin-left: 6px;
+      animation: blink 1s step-end infinite;
+      box-shadow: 0 0 5px rgba(0, 255, 65, 0.7);
+      transform: translateY(2px); /* Align with text */
+    }
+    @keyframes blink {
+      from, to { background-color: transparent; box-shadow: none; }
+      50% { background-color: #00ff41; box-shadow: 0 0 5px rgba(0, 255, 65, 0.7); }
+    }
+
+    /* Custom Terminal Loader */
+    .terminal-loader-container {
+      display: none; /* Hidden by default */
+      position: fixed;
+      inset: 0;
+      background-color: rgba(10, 10, 10, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .terminal-loader {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #333; /* Darker */
+      border-top-color: #00ff41; /* Bright green */
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Metric Bar (from original CSS, adapted) */
+    .metric-bar {
+      background-color: #333;
+      border-radius: 4px;
+      overflow: hidden;
+      width: 100px;
+      height: 10px;
+      border: 1px solid #222;
+    }
+    .metric-bar-inner {
+      height: 100%;
+      transition: width 0.3s ease-in-out;
+    }
+    /* Mapped to your getMetricColorClass */
+    .metric-bar-inner.high { background-color: #16a34a; } /* green-600 */
+    .metric-bar-inner.medium { background-color: #facc15; } /* yellow-400 */
+    .metric-bar-inner.low { background-color: #dc2626; } /* red-600 */
+
+    /* Boolean styles (from original CSS, adapted) */
+    .bd-true {
+      color: #22c55e; /* green-500 */
+      font-weight: bold;
+      text-shadow: 0 0 3px rgba(34, 197, 94, 0.5);
+    }
+    .bd-false {
+      color: #6b7280; /* gray-500 */
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #111;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #00ff41;
+      border-radius: 4px;
+      border: 1px solid #000;
+      box-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3fff6f;
+    }
+  </style>
+</head>
+<body class="bg-black min-h-screen">
+
+  <!-- Header Navbar -->
+  <nav class="p-4 border-b border-green-900 shadow-lg shadow-green-900/10">
+    <div class="container mx-auto flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-glow-green"><b>Radiatus Terminal</b> [v1.0]</h1>
+      <div class="text-sm text-gray-400">
+        <span class="hidden sm:inline">Last Sync: </span>
+        <span id="last-updated">Initializing...</span>
+        <span class="blinking-cursor"></span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container mx-auto p-4">
+    <p class="text-gray-400 mb-6">> root/signals: Automated crypto signals generator</p>
+
+    <div class="flex flex-col gap-8">
+      <!-- Long Signals -->
+      <div class="w-full">
+        <h3 class="text-2xl font-bold text-green-500 mb-3 text-glow-green">> Long Signals (BUY)</h3>
+        <div id="long-signals-container" class="border border-green-800 rounded-lg overflow-hidden shadow-lg shadow-green-900/20">
+          <p class="p-4 text-gray-500">Awaiting signal data...</p>
+        </div>
+      </div>
+
+      <!-- Short Signals -->
+      <div class="w-full">
+        <h3 class="text-2xl font-bold text-red-500 mb-3 text-glow-red">> Short Signals (SELL)</h3>
+        <div id="short-signals-container" class="border border-red-800 rounded-lg overflow-hidden shadow-lg shadow-red-900/20">
+          <p class="p-4 text-gray-500">Awaiting signal data...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="text-center text-gray-700 p-8 mt-12 text-xs border-t border-gray-900">
+    © 2025 Radiatus Crypto. All rights reserved. [Session ID: <span id="session-id"></span>]
+  </footer>
+
+  <!-- Loading Spinner Overlay -->
+  <div id="loading" class="terminal-loader-container">
+    <div class="terminal-loader"></div>
+  </div>
+
+  <!-- Embedded App JS (YOUR LOGIC) -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const longContainer = document.getElementById('long-signals-container');
+      const shortContainer = document.getElementById('short-signals-container');
+      const lastUpdatedEl = document.getElementById('last-updated');
+      const loaderEl = document.getElementById('loading');
+      const sessionIdEl = document.getElementById('session-id');
+
+      // Set session ID
+      sessionIdEl.textContent = crypto.randomUUID().split('-')[0];
+
+      // --- Your Configuration ---
+      const COLUMNS = [
+        { key: 'asset', header: 'Asset' },
+        { key: 'price', header: 'Price' },
+        { key: 'ob_metric', header: 'OB Metric' },
+        { key: 'divergence_metric', header: 'Divergence Metric' },
+        { key: 'iob_top', header: 'OB Top' },
+        { key: 'iob_btm', header: 'OB Bottom' },
+        { key: 'iob_left_utc', header: 'OB Start (UTC)' },
+        { key: 'mfi_bd', header: 'MFI BD' },
+        { key: 'stoch_bd', header: 'Stoch BD' },
+        { key: 'rsi_bd', header: 'RSI BD' },
+        { key: 'williams_r_bd', header: 'W%R BD' },
+      ];
+
+      // --- Your Helper Functions (Adapted for Terminal Theme) ---
+
+      function showLoader() {
+        loaderEl.style.display = 'flex';
+      }
+
+      function hideLoader() {
+        loaderEl.style.display = 'none';
+      }
+
+      function renderBoolArray(arr) {
+        if (!Array.isArray(arr)) return '<span>-</span>';
+        // The .bd-true and .bd-false classes are already styled in the <style> tag
+        return arr
+          .map(b => `<span class="bd-${b}">${b ? 'T' : 'F'}</span>`)
+          .join(' ');
+      }
+
+      function getMetricColorClass(metric) {
+        // This maps to the CSS classes: .high, .medium, .low
+        if (metric >= 0.7) return 'high';
+        if (metric >= 0.4) return 'medium';
+        return 'low';
+      }
+
+      function renderMetric(metric) {
+        if (typeof metric !== 'number') {
+            return '<span>-</span>';
+        }
+        const rounded = (metric * 100).toFixed(1);
+        const colorClass = getMetricColorClass(metric);
+        // Uses terminal-themed metric-bar classes
+        return `
+          <div class="flex items-center">
+            <span class="mr-2" style="width: 40px;">${rounded}%</span>
+            <div class="metric-bar">
+              <div class="metric-bar-inner ${colorClass}" style="width: ${rounded}%;"></div>
+            </div>
+          </div>
+        `;
+      }
+
+      /**
+       * Renders the table of signals (Your logic + Terminal styles)
+       * @param {HTMLElement} container - The container element to render into
+       * @param {Array<object>} data - Array of signal objects
+       * @param {string} headerColorClass - Tailwind class for header text (e.g., 'text-green-400')
+       */
+      function renderTable(container, data, headerColorClass) {
+        if (!data || data.length === 0) {
+          container.innerHTML = `<p class="p-4 text-gray-500">No active signals found.</p>`;
+          return;
+        }
+
+        const headerHtml = COLUMNS.map(col => 
+          `<th class="p-3 text-left text-xs font-bold ${headerColorClass} uppercase tracking-wider">${col.header}</th>`
+        ).join('');
+
+        const bodyHtml = data.map(row => {
+          const cellsHtml = COLUMNS.map(col => {
+            let cell = row[col.key];
+
+            // Your cell formatting logic
+            if (cell === null || typeof cell === 'undefined') {
+              cell = '-';
+            } else if (col.key === 'ob_metric' || col.key === 'divergence_metric') {
+              cell = renderMetric(cell);
+            } else if (col.key.endsWith('_bd')) {
+              cell = renderBoolArray(cell);
+            } else if (col.key === 'iob_left_utc') {
+              cell = new Date(cell).toLocaleString('sv-SE', { timeZone: 'UTC' }).replace('T', ' ');
+            } else if (typeof cell === 'number' && !['price', 'iob_top', 'iob_btm'].includes(col.key)) {
+              cell = cell.toFixed(2);
+            }
+            
+            return `<td class="p-3 whitespace-nowrap">${cell}</td>`;
+          }).join('');
+          
+          return `
+            <tr class="border-b border-gray-900 hover:bg-gray-900 transition-colors duration-150">
+              ${cellsHtml}
+            </tr>
+          `;
+        }).join('');
+
+        container.innerHTML = `
+          <div class="overflow-x-auto max-h-[65vh]">
+            <table class="w-full text-sm">
+              <thead class="sticky top-0 bg-black bg-opacity-80 backdrop-blur-sm border-b border-gray-800">
+                <tr>${headerHtml}</tr>
+              </thead>
+              <tbody class="divide-y divide-gray-900">
+                ${bodyHtml}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+
+      // --- Your Main Fetch Function ---
+      async function fetchData() {
+        showLoader();
+
+        try {
+          const response = await fetch('/api/signals');
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const data = await response.json();
+
+          // Render tables with correct theme colors
+          renderTable(longContainer, data.long, 'text-green-400');
+          renderTable(shortContainer, data.short, 'text-red-400');
+
+          // Update last updated timestamp
+          if (data.last_updated) {
+            const local = new Date(data.last_updated + 'Z').toLocaleString();
+            lastUpdatedEl.textContent = local;
+          } else {
+            lastUpdatedEl.textContent = 'Last Updated: Never';
+          }
+
+        } catch (err) {
+          console.error('Error fetching data:', err);
+          // Display error in terminal style
+          const errorMsg = `<p class="p-4 text-red-500">> Error: Failed to load signals. ${err.message}</p>`;
+          longContainer.innerHTML = errorMsg;
+          shortContainer.innerHTML = errorMsg;
+          lastUpdatedEl.textContent = 'Update Failed';
+        } finally {
+          hideLoader();
+        }
+      }
+
+      // Initial fetch on page load
+      fetchData();
+      
+      // Uncomment this line to auto-refresh every 60 seconds
+      // setInterval(fetchData, 60000);
+    });
+  </script>
+
+</body>
+</html>

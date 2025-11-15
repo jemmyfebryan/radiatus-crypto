@@ -1,0 +1,56 @@
+body {
+  font-size: 0.875rem;
+}
+
+.table {
+  vertical-align: middle;
+}
+
+.metric-bar {
+  background-color: #333;
+  border-radius: 4px;
+  overflow: hidden;
+  width: 100px;
+  height: 10px;
+}
+
+.metric-bar-inner {
+  height: 100%;
+  background-color: #0d6efd;
+  transition: width 0.3s ease-in-out;
+}
+
+.metric-bar-inner.high { background-color: #198754; }
+.metric-bar-inner.medium { background-color: #ffc107; }
+.metric-bar-inner.low { background-color: #dc3545; }
+
+.bd-true {
+  color: #198754;
+  font-weight: bold;
+}
+
+.bd-false {
+  color: #6c757d;
+}
+
+.loading-spinner {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+}
+
+.table-responsive {
+  max-height: 70vh;
+}
+
+/* Sticky table header */
+.table-responsive thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: #212529;
+  box-shadow: inset 0 -2px 0 #32383e;
+}

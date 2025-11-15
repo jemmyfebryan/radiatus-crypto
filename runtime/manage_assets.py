@@ -298,6 +298,8 @@ async def update_asset(asset_code, lock: asyncio.Lock = None):
     else:
         # Await the async fetch function
         df = await fetch_crypto_data(asset)
+        
+    df.dropna(inplace=True)
 
     overlap_from_ts = latest_ts if latest_ts else None
     

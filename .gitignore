@@ -5,3 +5,4 @@ __pycache__
 assets.db
 assets.db-shm
 assets.db-wal
+divergence.json
